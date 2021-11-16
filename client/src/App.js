@@ -1,4 +1,4 @@
-import React, { Component, useRef } from 'react';
+import React, { Component } from 'react';
 import getWeb3 from './getWeb3';
 import ItemContract from './contracts/Item.json';
 import ItemManagerContract from './contracts/ItemManager.json';
@@ -6,7 +6,15 @@ import ItemManagerContract from './contracts/ItemManager.json';
 import './App.css';
 
 class App extends Component {
-	state = { loaded: false, cost: useRef(0), itemName: useRef('') };
+	constructor() {
+		super();
+		this.handleSubmit = this.handleSubmit.bind(this);
+		this.state = {
+			loaded: false,
+			cost: 0,
+			itemName: 'test item',
+		};
+	}
 
 	componentDidMount = async () => {
 		try {
@@ -19,12 +27,12 @@ class App extends Component {
 			// Get the contract instance.
 			const networkId = await this.web3.eth.net.getId();
 
-			this.itemManager = new web3.eth.Contract(
+			this.itemManager = new this.web3.eth.Contract(
 				ItemManagerContract.abi,
 				ItemManagerContract.networks[networkId] &&
 					ItemManagerContract.networks[networkId].address
 			);
-			this.item = new web3.eth.Contract(
+			this.item = new this.web3.eth.Contract(
 				ItemContract.abi,
 				ItemContract.networks[networkId] &&
 					ItemContract.networks[networkId].address
@@ -42,20 +50,51 @@ class App extends Component {
 		}
 	};
 
+	handleSubmit = (values) => {
+		console.log(values);
+	};
+
+	handleChange = (e) => {
+		console.log(this.state);
+		this.setState({ [e.target.name]: e.target.value });
+	};
+
 	render() {
 		if (!this.state.loaded) {
 			return <div>Loading Web3, accounts, and contract...</div>;
 		}
 		return (
-			<div className="App">
-				<h1>Supply</h1>
-				<h1>Items</h1>
-				<form>
-					<div>
-						<input type="text" ref={this.cost} />
+			<div className="container App mw-50">
+				<h1 className="text-center">Supply Chain</h1>
+				<h4 className="text-center ">Items</h4>
+				<form className="main-form">
+					<div className="mb-3">
+						<label className="form-label">Item Name</label>
+						<input
+							name="itemName"
+							onChange={this.handleChange}
+							type="text"
+							className="form-control"
+						/>
 					</div>
+					<div className="mb-3">
+						<label className="form-label">Item Price</label>
+						<input
+							name="cost"
+							onChange={this.handleChange}
+							type="text"
+							className="form-control"
+						/>
+					</div>
+
+					<button
+						onSubmit={this.state.handleSubmit}
+						type="submit"
+						className="btn btn-primary w-100"
+					>
+						Submit
+					</button>
 				</form>
-				<div>The stored value is: {this.state.storageValue}</div>
 			</div>
 		);
 	}
