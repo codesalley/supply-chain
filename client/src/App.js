@@ -10,6 +10,7 @@ class App extends Component {
 		super();
 		this.handleChange = this.handleChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
+		this.lisenToPayment = this.lisenToPayment.bind(this);
 		this.state = {
 			loaded: false,
 			cost: 0,
@@ -26,21 +27,23 @@ class App extends Component {
 			this.accounts = await this.web3.eth.getAccounts();
 
 			// Get the contract instance.
-			const networkId = await this.web3.eth.net.getId();
-
+			this.networkId = await this.web3.eth.net.getId();
+			console.log(ItemManagerContract.networks[this.networkId]?.address);
+			console.log(this.accounts);
 			this.itemManager = new this.web3.eth.Contract(
 				ItemManagerContract.abi,
-				ItemManagerContract.networks[networkId] &&
-					ItemManagerContract.networks[networkId].address
+				ItemManagerContract.networks[this.networkId] &&
+					ItemManagerContract.networks[this.networkId].address
 			);
 			this.item = new this.web3.eth.Contract(
 				ItemContract.abi,
-				ItemContract.networks[networkId] &&
-					ItemContract.networks[networkId].address
+				ItemContract.networks[this.networkId] &&
+					ItemContract.networks[this.networkId].address
 			);
 
 			// Set web3, accounts, and contract to the state, and then proceed with an
 			// example of interacting with the contract's methods.
+			this.lisenToPayment();
 			this.setState({ loaded: true });
 		} catch (error) {
 			// Catch any errors for any of the above operations.
@@ -52,14 +55,19 @@ class App extends Component {
 	};
 
 	handleSubmit = async () => {
-		this.itemManager.methods
+		const res = await this.itemManager.methods
 			.createItem(this.state.itemName, this.state.cost)
 			.send({ from: this.accounts[0] });
+		console.log(res);
 		this.setState({ itemName: '', cost: 0 });
 	};
 
 	handleChange = (e) => {
 		this.setState({ [e.target.name]: e.target.value });
+	};
+
+	lisenToPayment = () => {
+		this.itemManager.events.SupplyChainStep().on('data', (e) => console.log(e));
 	};
 
 	render() {
