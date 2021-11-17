@@ -8,6 +8,7 @@ import './App.css';
 class App extends Component {
 	constructor() {
 		super();
+		this.handleChange = this.handleChange.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.state = {
 			loaded: false,
@@ -50,12 +51,14 @@ class App extends Component {
 		}
 	};
 
-	handleSubmit = (values) => {
-		console.log(values);
+	handleSubmit = async () => {
+		this.itemManager.methods
+			.createItem(this.state.itemName, this.state.cost)
+			.send({ from: this.accounts[0] });
+		this.setState({ itemName: '', cost: 0 });
 	};
 
 	handleChange = (e) => {
-		console.log(this.state);
 		this.setState({ [e.target.name]: e.target.value });
 	};
 
@@ -67,34 +70,33 @@ class App extends Component {
 			<div className="container App mw-50">
 				<h1 className="text-center">Supply Chain</h1>
 				<h4 className="text-center ">Items</h4>
-				<form className="main-form">
-					<div className="mb-3">
-						<label className="form-label">Item Name</label>
-						<input
-							name="itemName"
-							onChange={this.handleChange}
-							type="text"
-							className="form-control"
-						/>
-					</div>
-					<div className="mb-3">
-						<label className="form-label">Item Price</label>
-						<input
-							name="cost"
-							onChange={this.handleChange}
-							type="text"
-							className="form-control"
-						/>
-					</div>
 
-					<button
-						onSubmit={this.state.handleSubmit}
-						type="submit"
-						className="btn btn-primary w-100"
-					>
-						Submit
-					</button>
-				</form>
+				<div className="mb-3">
+					<label className="form-label">Item Name</label>
+					<input
+						name="itemName"
+						onChange={this.handleChange}
+						type="text"
+						className="form-control"
+					/>
+				</div>
+				<div className="mb-3">
+					<label className="form-label">Item Price</label>
+					<input
+						name="cost"
+						onChange={this.handleChange}
+						type="text"
+						className="form-control"
+					/>
+				</div>
+
+				<button
+					onClick={this.handleSubmit}
+					type="button"
+					className="btn btn-primary w-100"
+				>
+					Submit
+				</button>
 			</div>
 		);
 	}
